@@ -18,6 +18,20 @@
         </tbody>
       </table>
       <div class="line-break m-2"></div>
+        <div class="hourly">
+          <table class="table table-borderless">  
+            <tbody class="tbody-scrollbar">
+            <tr class="tr-scrollbar">
+                <td scope="col" class="weather-hourly" v-for="(item, index) in weatherDataReportHourly" :key="'B'+index">
+                    <div>{{hourConversion(item.dt*1000)}} {{(hourConversion(item.dt*1000) >= '12:00') ? 'PM' : 'AM'}}</div>
+                    <img :src="`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`"/>
+                    <div>{{Math.round(temperatureConverter(item.temp))}}°</div>
+                </td>
+            </tr>
+            </tbody>
+          </table>
+      </div>
+      <div class="line-break m-2"></div>
       <table class="table table-borderless" v-for="(item, id) in weatherDataReport" :key="'A'+ id">  
         <tbody>
           <tr>
@@ -43,13 +57,13 @@
               <div>
                 SUNRISE
               </div>
-              <h2>{{sunRise}}AM</h2>
+              <h2>{{hourConversion(this.weatherDataInfo.current.sunrise * 1000)}}AM</h2>
               </td>
             <td scope="col">
               <div>
                 SUNSET
               </div>
-              <h2>{{sunSet}}PM</h2>
+              <h2>{{hourConversion(this.weatherDataInfo.current.sunset * 1000)}}PM</h2>
               </td>
           </tr>
           <tr>
@@ -86,19 +100,18 @@ export default {
         return i;
       }).splice(1, 7)
     },
-    sunRise(){
-     const date = new Date(this.weatherDataInfo.current.sunrise * 1000);
-     return moment(date, "hmm").format("HH:mm");
-   },
-   sunSet(){
-     const date = new Date(this.weatherDataInfo.current.sunset * 1000);
-     return moment(date, "hmm").format("HH:mm");
-   }
+    weatherDataReportHourly(){
+        return this.weatherDataInfo.hourly;
+    }
   },
   methods: {      
    temperatureConverter: function(valNum) {
       valNum = parseFloat(valNum);
       return ((valNum-273.15)*1.8)+32;
+   },
+   hourConversion: function(value){
+     const date = new Date(value);
+     return moment(date, "hmm").format("HH:mm");
    },
    getDayText: function(item) {
      const date = new Date(item.dt*1000).getDay();
@@ -150,5 +163,19 @@ td {
 }
 .minimum {
   color: #249ac2;
+}
+.weather-hourly{
+  text-align: center;
+  display:inline-block;
+}
+.tr-scrollbar {   
+  white-space:nowrap; 
+}
+.hourly {
+    overflow-x: scroll;
+    min-width: 300px;
+}
+::-webkit-scrollbar {
+    background: transparent;
 }
 </style>
