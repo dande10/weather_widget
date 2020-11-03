@@ -9,7 +9,7 @@
         :enable-geolocation="true"
         types="(cities)"
         ref="autocomplete"
-        @keypress.enter.prevent="locationWeather"
+        @keyup.enter="locationWeather"
       />
       <button class="btn btn-primary btn-search" @click="locationWeather">
         Search
@@ -30,17 +30,59 @@ export default {
   name: 'search-location',
   data: function () {
       return {
-        address: '',
-        weatherDataInfo: null
+        address: null,
+        weatherDataInfo: null,
+        currentLocationData: {}
       }
   }, 
   created: function() {
-    this.locationWeather();
+    // this.locationWeather();
   },
   mounted(){
     this.$refs.autocomplete.focus();
+    let self = this;
+    navigator.geolocation.getCurrentPosition(function(position){ 
+        var currentLatitude = position.coords.latitude;
+        var currentLongitude = position.coords.longitude;
+        self.displayLocation(currentLatitude, currentLongitude);
+        var key = '0ec264d8c9018c3ce096a46a309951df';
+        const currentLocation = { lat: currentLatitude, lng: currentLongitude };
+        fetch('https://api.openweathermap.org/data/2.5/onecall?lat='+currentLocation.lat+'&lon='+currentLocation.lng+'&appid='+ key).then(function(resp) { return resp.json() }) // Convert data to json
+        .then(function(data) {
+            let obj = JSON.stringify(data)
+            self.weatherDataInfo = JSON.parse(obj)
+        })
+        .catch(function() {
+            // catch any errors
+        });    
+	});
   },
-  methods: {    
+  methods: { 
+   displayLocation: function(latitude, longitude) {
+    return new Promise(function (resolve, reject) {
+        var request = new XMLHttpRequest();
+
+        var method = 'GET';
+        var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&sensor=true';
+        var async = true;
+
+        request.open(method, url, async);
+        request.onreadystatechange = function () {
+            if (request.readyState == 4) {
+                if (request.status == 200) {
+                    var data = JSON.parse(request.responseText);
+                    var address = data.results[0];
+                    resolve(address);
+                    console.log(address, 'address')
+                }
+                else {
+                    reject(request.status);
+                }
+            }
+        };
+        request.send();
+    });
+},
    getAddressData: function (addressData) {
     this.address = addressData;
    },

@@ -1,7 +1,7 @@
 <template>
     <div class="weather-forecast container mt-4" v-if="weatherDataInfo">
       <div class="current-report text-center">
-        <h1>{{address.locality}}</h1> 
+        <h1 v-if="address">{{address.locality}}</h1> 
         <p>{{weatherDataInfo.current.weather[0].main}}</p>
         <h1>{{Math.round(temperatureConverter(weatherDataInfo.current.temp))}}°F</h1>
       </div>
