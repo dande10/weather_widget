@@ -32,29 +32,32 @@ export default {
       return {
         address: null,
         weatherDataInfo: null,
-        currentLocationData: {}
+        currentLocationData: {},
+        currentLatitude: null,
+        currentLongitude: null,
       }
   }, 
   created: function() {
-    // this.locationWeather();
+   
   },
   mounted(){
     this.$refs.autocomplete.focus();
     let self = this;
     navigator.geolocation.getCurrentPosition(function(position){ 
-        var currentLatitude = position.coords.latitude;
-        var currentLongitude = position.coords.longitude;
-        self.displayLocation(currentLatitude, currentLongitude);
-        var key = '0ec264d8c9018c3ce096a46a309951df';
-        const currentLocation = { lat: currentLatitude, lng: currentLongitude };
-        fetch('https://api.openweathermap.org/data/2.5/onecall?lat='+currentLocation.lat+'&lon='+currentLocation.lng+'&appid='+ key).then(function(resp) { return resp.json() }) // Convert data to json
-        .then(function(data) {
-            let obj = JSON.stringify(data)
-            self.weatherDataInfo = JSON.parse(obj)
-        })
-        .catch(function() {
-            // catch any errors
-        });    
+      self.currentLatitude = position.coords.latitude;
+      self.currentLongitude = position.coords.longitude;
+      
+      var key = '0ec264d8c9018c3ce096a46a309951df';
+      const currentLocation = { lat: self.currentLatitude, lng: self.currentLongitude };
+      fetch('https://api.openweathermap.org/data/2.5/onecall?lat='+currentLocation.lat+'&lon='+currentLocation.lng+'&appid='+ key).then(function(resp) { return resp.json() }) // Convert data to json
+      .then(function(data) {
+          let obj = JSON.stringify(data)
+          self.weatherDataInfo = JSON.parse(obj)
+      })
+      .catch(function() {
+          // catch any errors
+      });
+      self.displayLocation(self.currentLatitude, self.currentLongitude);   
 	});
   },
   methods: { 
@@ -63,7 +66,7 @@ export default {
         var request = new XMLHttpRequest();
 
         var method = 'GET';
-        var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&sensor=true';
+        var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&key=AIzaSyAu05CJD09ia3FIyp73kbokhoAGTRsTfQc&sensor=true';
         var async = true;
 
         request.open(method, url, async);
